@@ -7,7 +7,7 @@ using CppAD::AD;
 
 // TODO: Set the timestep length and duration
 size_t N = 10;
-double dt = 0.1;
+double dt = .1;
 
 // Both the reference cross track and orientation errors are 0.
 // The reference velocity is set to 40 mph.
@@ -193,15 +193,15 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   // degrees (values in radians).
   // NOTE: Feel free to change this to something else.
   for (int i = delta_start; i < a_start; i++) {
-    vars_lowerbound[i] = -0.436332;
-    vars_upperbound[i] = 0.436332;
+    vars_lowerbound[i] = -0.136332;
+    vars_upperbound[i] = 0.136332;
   }
 
   // Acceleration/decceleration upper and lower limits.
   // NOTE: Feel free to change this to something else.
   for (int i = a_start; i < n_vars; i++) {
-    vars_lowerbound[i] = -1.0;
-    vars_upperbound[i] = 1.0;
+    vars_lowerbound[i] = -.3;
+    vars_upperbound[i] = .3;
   }
 
   // Lower and upper limits for the constraints
@@ -267,8 +267,14 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   //
   // {...} is shorthand for creating a vector, so auto x1 = {1.0,2.0}
   // creates a 2 element double vector.
-  return {solution.x[x_start + 1],   solution.x[y_start + 1],
-          solution.x[psi_start + 1], solution.x[v_start + 1],
-          solution.x[cte_start + 1], solution.x[epsi_start + 1],
-          solution.x[delta_start],   solution.x[a_start]};
+  vector<double> result;
+  for (int i = 0; i < N; ++i) {
+    result.push_back(solution.x[x_start + i]);
+  }
+  for (int i = 0; i < N; ++i) {
+    result.push_back(solution.x[y_start + i]);
+  }
+  result.push_back(solution.x[delta_start]);
+  result.push_back(solution.x[a_start]);
+  return result;
 }
