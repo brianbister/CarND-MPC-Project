@@ -114,16 +114,15 @@ int main() {
           Eigen::Map<Eigen::VectorXd> eigen_ptsy(ptsy.data(), ptsy.size());
           Eigen::VectorXd fit_coefficients = polyfit(eigen_ptsx,
                                                      eigen_ptsy, 3);
-          // In the vehicle coordinates, our position is (0, 0). Because
-          // of this we call polyeval with a 0 "x" point. We would normally
-          // subtract "y" here, but since it is 0 there is nothing to do.
+          // Attempt to account for latency by guess where our car is going
+          // to be 100ms from now based on a starting (0, 0) coordinate
+          // position.
           px = .1 * v * cos(psi);
           py = .1 * v * sin(psi);
           double cte = polyeval(fit_coefficients, px) - py;
           
           // Our epsi is -atan(f'(x)), the derivative of our polynomial is
-          // coeff[1] + 2 * coeff[2] * x. x is 0, so it is just coeff[1]. And
-          // our vehicles psi is 0 so there is nothing to subtract.
+          // coeff[1] + 2 * coeff[2] * x.
           double epsi = -atan(fit_coefficients[1] + 2 * fit_coefficients[2] * px);
 
           // x, y, and psi are all 0 because we are in cars coords.
