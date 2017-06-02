@@ -92,6 +92,15 @@ int main() {
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
 
+          // We need to change to the cars coordinate system, this is done by
+          // applying a translation and rotation transformation.
+          for (int i = 0; i < ptsx.size(); ++i) {
+            double trans_x = ptsx[i] - px;  // Translate
+            double trans_y = ptsy[i] - py;
+            ptsx[i] = trans_x * cos(psi) + trans_y * sin(psi);  // Clockwise rotation
+            ptsy[i] = trans_x * -sin(psi) + trans_y * cos(psi);
+          }
+
           /*
           * TODO: Calculate steeering angle and throttle using MPC.
           *
@@ -117,15 +126,11 @@ int main() {
           msgJson["mpc_x"] = mpc_x_vals;
           msgJson["mpc_y"] = mpc_y_vals;
 
-          //Display the waypoints/reference line
-          vector<double> next_x_vals;
-          vector<double> next_y_vals;
-
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line
 
-          msgJson["next_x"] = next_x_vals;
-          msgJson["next_y"] = next_y_vals;
+          msgJson["next_x"] = ptsx;
+          msgJson["next_y"] = ptsy;
 
 
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
