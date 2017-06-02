@@ -7,7 +7,7 @@ using CppAD::AD;
 
 // TODO: Set the timestep length and duration
 size_t N = 10;
-double dt = .1;
+double dt = .05;
 
 // Both the reference cross track and orientation errors are 0.
 // The reference velocity is set to 40 mph.
@@ -68,8 +68,8 @@ class FG_eval {
 
     // Minimize the value gap between sequential actuations.
     for (int i = 0; i < N - 2; i++) {
-      fg[0] += CppAD::pow(vars[delta_start + i + 1] - vars[delta_start + i], 2);
-      fg[0] += CppAD::pow(vars[a_start + i + 1] - vars[a_start + i], 2);
+      fg[0] += 1000 * CppAD::pow(vars[delta_start + i + 1] - vars[delta_start + i], 2);
+      fg[0] += 1000 * CppAD::pow(vars[a_start + i + 1] - vars[a_start + i], 2);
     }
 
     //
@@ -193,15 +193,15 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   // degrees (values in radians).
   // NOTE: Feel free to change this to something else.
   for (int i = delta_start; i < a_start; i++) {
-    vars_lowerbound[i] = -0.136332;
-    vars_upperbound[i] = 0.136332;
+    vars_lowerbound[i] = -0.156332;
+    vars_upperbound[i] = 0.156332;
   }
 
   // Acceleration/decceleration upper and lower limits.
   // NOTE: Feel free to change this to something else.
   for (int i = a_start; i < n_vars; i++) {
-    vars_lowerbound[i] = -.3;
-    vars_upperbound[i] = .3;
+    vars_lowerbound[i] = -.2;
+    vars_upperbound[i] = .2;
   }
 
   // Lower and upper limits for the constraints

@@ -117,12 +117,14 @@ int main() {
           // In the vehicle coordinates, our position is (0, 0). Because
           // of this we call polyeval with a 0 "x" point. We would normally
           // subtract "y" here, but since it is 0 there is nothing to do.
-          double cte = polyeval(fit_coefficients, 0);
+          px = .1 * v * cos(psi);
+          py = .1 * v * sin(psi);
+          double cte = polyeval(fit_coefficients, px) - py;
           
           // Our epsi is -atan(f'(x)), the derivative of our polynomial is
           // coeff[1] + 2 * coeff[2] * x. x is 0, so it is just coeff[1]. And
           // our vehicles psi is 0 so there is nothing to subtract.
-          double epsi = -atan(fit_coefficients[1]);
+          double epsi = -atan(fit_coefficients[1] + 2 * fit_coefficients[2] * px);
 
           // x, y, and psi are all 0 because we are in cars coords.
           Eigen::VectorXd state(6);
