@@ -93,6 +93,11 @@ int main() {
           double py = j[1]["y"];
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
+          double steer = j[1]["steering_angle"];
+          double throttle = j[1]["throttle"];
+          double speed = j[1]["speed"];
+
+          double v_ms = v * 1609 / 3600;
 
           // We need to change to the cars coordinate system, this is done by
           // applying a translation and rotation transformation.
@@ -114,20 +119,28 @@ int main() {
           Eigen::Map<Eigen::VectorXd> eigen_ptsy(ptsy.data(), ptsy.size());
           Eigen::VectorXd fit_coefficients = polyfit(eigen_ptsx,
                                                      eigen_ptsy, 3);
-          // Attempt to account for latency by guess where our car is going
-          // to be 100ms from now based on a starting (0, 0) coordinate
-          // position.
-          px = .1 * v * cos(psi);
-          py = .1 * v * sin(psi);
-          double cte = polyeval(fit_coefficients, px) - py;
-          
+
+
           // Our epsi is -atan(f'(x)), the derivative of our polynomial is
           // coeff[1] + 2 * coeff[2] * x.
           double epsi = -atan(fit_coefficients[1] + 2 * fit_coefficients[2] * px);
+          double cte = 0;
+          double Lf = 2.67;
+          // Attempt to account for latency by guess where our car is going
+          // to be 100ms from now based on a starting (0, 0) coordinate
+          // position.
+          double delay_t = .1;
 
+          double delay_x = 0 + v_ms * delay_t;
+          double delay_y = 0;
+          double delay_psi = - v_ms / Lf * steer * delay_t;
+          double delay_v = v + throttle * delay_t;
+          double delay_cte = cte + v_ms * sin(epsi) * delay_t;
+          double delay_epsi = epsi - v_ms / Lf * steer * delay_t;
+          
           // x, y, and psi are all 0 because we are in cars coords.
           Eigen::VectorXd state(6);
-          state << 0, 0, 0, v, cte, epsi;
+          state << delay_x, delay_y, delay_psi, delay_v, delay_cte, delay_epsi;
 
 
           vector<double> vars = mpc.Solve(state, fit_coefficients);
